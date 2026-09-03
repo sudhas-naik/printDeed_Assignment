@@ -13,7 +13,7 @@ cp .env.example .env
 npm start
 ```
 
-The default compose mapping is `localhost:15432` so it does not collide with a local Postgres on 5432 or 5433.
+`npm start` reads `.env`. The default compose mapping is `localhost:15432` so it does not collide with a local Postgres on 5432 or 5433.
 
 ```bash
 # create two accounts

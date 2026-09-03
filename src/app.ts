@@ -31,7 +31,8 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
   app.get("/health", async () => ({ ok: true }));
 
   app.addHook("preHandler", async (req, reply) => {
-    if (req.url === "/health" || req.method === "OPTIONS") {
+    const path = req.url.split("?")[0];
+    if (path === "/health" || req.method === "OPTIONS") {
       return;
     }
     const key = req.headers["x-api-key"];

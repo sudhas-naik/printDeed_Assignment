@@ -91,7 +91,11 @@ export async function createTransfer(
         return outcome;
       } catch (err) {
         await rollbackQuiet(client);
-        if (err instanceof RetryTransaction || isRetryablePg(err)) {
+        if (
+          err instanceof RetryTransaction ||
+          isRetryablePg(err) ||
+          isUniqueViolation(err)
+        ) {
           continue;
         }
         throw err;
@@ -223,13 +227,23 @@ async function performNewTransfer(
     );
   }
 
-  await client.query(
-    `UPDATE accounts SET balance_cents = balance_cents - $1 WHERE id = $2`,
-    [input.amount.cents.toString(), input.fromAccountId],
+  const cents = input.amount.cents.toString();
+  const debit = await client.query(
+    `UPDATE accounts
+     SET balance_cents = balance_cents - $1
+     WHERE id = $2 AND balance_cents >= $1`,
+    [cents, input.fromAccountId],
   );
+  if ((debit.rowCount ?? 0) !== 1) {
+    throw new AppError(
+      409,
+      "INSUFFICIENT_FUNDS",
+      "from_account does not have sufficient funds",
+    );
+  }
   await client.query(
     `UPDATE accounts SET balance_cents = balance_cents + $1 WHERE id = $2`,
-    [input.amount.cents.toString(), input.toAccountId],
+    [cents, input.toAccountId],
   );
 
   const inserted = await client.query<TransferRow>(
@@ -279,12 +293,21 @@ export async function getTransfer(
   return toTransferPublic(row);
 }
 
-function isRetryablePg(err: unknown): boolean {
+function pgCode(err: unknown): string | undefined {
   if (typeof err !== "object" || err === null || !("code" in err)) {
-    return false;
+    return undefined;
   }
   const code = (err as { code: unknown }).code;
+  return typeof code === "string" ? code : undefined;
+}
+
+function isRetryablePg(err: unknown): boolean {
+  const code = pgCode(err);
   return code === "40001" || code === "40P01";
+}
+
+function isUniqueViolation(err: unknown): boolean {
+  return pgCode(err) === "23505";
 }
 
 async function rollbackQuiet(client: pg.PoolClient): Promise<void> {
