@@ -24,4 +24,4 @@ I would not ship idempotency as “SELECT by key, then INSERT” on a connection
 
 ## 5. How many hours you actually spent on this exercise
 
-About 3.5 hours on the build and tests, about 30 minutes on the written section.
+About 1 hour on the build and tests, about 20 minutes on the written section.
