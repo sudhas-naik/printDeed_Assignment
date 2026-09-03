@@ -4,6 +4,7 @@
 
 I have **2 years of experience in a senior role**.
 
+
 My primary stack today is **React, Next.js, and TypeScript** on the frontend, with **TypeScript, and PostgreSQL** for backend development.
 
 ## 2. One or two production systems
