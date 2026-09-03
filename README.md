@@ -9,7 +9,7 @@ Postgres 16 and Node 20+ are required.
 ```bash
 npm install
 docker compose up -d --wait
-cp .env.example .env
+cp  .env
 npm start
 ```
 
