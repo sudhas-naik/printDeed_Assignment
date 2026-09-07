@@ -13,7 +13,6 @@ async function main() {
   await app.listen({ port: config.port, host: "0.0.0.0" });
   console.log(`money-transfer-api listening on :${config.port}`);
 }
-
 main().catch((err) => {
   console.error(err);
   process.exit(1);
